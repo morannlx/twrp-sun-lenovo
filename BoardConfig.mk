@@ -35,19 +35,6 @@ AB_OTA_PARTITIONS := \
     vendor \
     vendor_dlkm
 
-# AB partitions for oplus
-AB_OTA_PARTITIONS += \
-    my_bigball \
-    my_carrier \
-    my_company \
-    my_engineering \
-    my_heytap \
-    my_manifest \
-    my_preload \
-    my_product \
-    my_region \
-    my_stock
-
 # Bootloader
 PRODUCT_PLATFORM                := sun
 TARGET_BOOTLOADER_BOARD_NAME    := sun
@@ -90,15 +77,14 @@ BOARD_SUPER_PARTITION_SIZE                  := 15569256448
 BOARD_SUPER_PARTITION_GROUPS                := qti_dynamic_partitions
 BOARD_QTI_DYNAMIC_PARTITIONS_SIZE           := 15565062144
 BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor vendor_dlkm odm
-BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST += my_bigball my_carrier my_company my_engineering my_heytap my_manifest my_preload my_product my_region my_stock
 
 BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_COPY_OUT_ODM             := odm
 TARGET_COPY_OUT_VENDOR          := vendor
 
 # Platform
-TARGET_BOARD_PLATFORM   := sm87xx
-QCOM_BOARD_PLATFORMS    += sm87xx
+TARGET_BOARD_PLATFORM   := sun
+QCOM_BOARD_PLATFORMS    += sun
 
 # Recovery
 BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE    := true
@@ -135,7 +121,7 @@ PLATFORM_VERSION                := 99.87.36
 PLATFORM_VERSION_LAST_STABLE    := $(PLATFORM_VERSION)
 PLATFORM_SECURITY_PATCH         := 2099-12-31
 VENDOR_SECURITY_PATCH           := $(PLATFORM_SECURITY_PATCH)
-TW_DEVICE_VERSION               := OPLUS-SM87XX
+TW_DEVICE_VERSION               := TB322FC
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
