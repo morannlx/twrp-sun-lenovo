@@ -136,3 +136,18 @@ TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI      := true
 TW_NO_SCREEN_BLANK                      := true
 TW_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID  := true
 TW_NO_NETWORK                           := true
+
+# 强制使用软件Keymint fallback，规避Strongbox硬件适配问题
+TW_DISABLE_STRONGBOX := true
+# 启用Keymint服务自动重启
+TW_KEYMASTER_AUTO_RESTART := true
+# 适配Android 15的密钥存储格式
+TW_CRYPTO_FBE_V2 := true
+# 启用Secure Element服务日志输出
+TW_SECURE_ELEMENT_DEBUG := true
+TARGET_QCOM_SECURE_ELEMENT := true
+TW_DISABLE_SE_HW_CHECK := true
+# 禁用未适配的PMIC子节点探针
+BOARD_DISABLE_PMIC_SUB_NODES := true
+# 强制使用通用PMIC驱动
+TARGET_PMIC_DRIVER := qcom-spmi-pmic-generic

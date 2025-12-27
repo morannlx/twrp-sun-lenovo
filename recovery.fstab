@@ -49,6 +49,17 @@ system_dlkm                                /system_dlkm           ext4    ro,bar
 system_dlkm                                /system_dlkm           erofs   ro                                                                                              wait,slotselect,avb=vbmeta_system,logical,first_stage_mount,avb_keys=/avb/q-gsi.avbpubkey:/avb/r-gsi.avbpubkey:/avb/s-gsi.avbpubkey
 odm                                        /odm                   ext4    ro,barrier=1,discard                                                                            wait,slotselect,logical,first_stage_mount,nofail
 odm                                        /odm                   erofs   ro                                                                                              wait,slotselect,logical,first_stage_mount,nofail
+# 新增ODM固件分区挂载，解决触控、振动固件加载失败
+/dev/block/mapper/odm${ro.boot.slot_suffix} /odm_firmware          ext4    ro,barrier=1,discard                                                                            wait,slotselect,logical,first_stage_mount,nofail
+# 新增vendor固件分区挂载，适配adsp等核心固件
+/dev/block/mapper/vendor${ro.boot.slot_suffix} /vendor_firmware    ext4    ro,barrier=1,discard                                                                            wait,slotselect,logical,first_stage_mount,nofail
+# 绑定USB PHY节点，修复HS PHY中断缺失问题
+/dev/block/bootdevice/by-name/usb_phy      /sys/class/usb_phy     none    bind                                                                                             wait,first_stage_mount
 /dev/block/by-name/metadata                /metadata              f2fs    noatime,nosuid,nodev,discard                                                                    wait,check,formattable,first_stage_mount
-/dev/block/bootdevice/by-name/userdata     /data                  f2fs    noatime,nosuid,nodev,discard,reserve_root=32768,resgid=1065,fsync_mode=nobarrier,inlinecrypt    latemount,resize,wait,check,formattable,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0,keydirectory=/metadata/vold/metadata_encryption,metadata_encryption=aes-256-xts:wrappedkey_v0,quota,reservedsize=128M,sysfs_path=/sys/devices/platform/soc/1d84000.ufshc,checkpoint=fs
+# 优化data分区挂载参数，修复FBE解密兼容问题
+/dev/block/bootdevice/by-name/userdata     /data                  f2fs    noatime,nosuid,nodev,discard,reserve_root=32768,resgid=1065,fsync_mode=nobarrier,inlinecrypt,forcef2fs    latemount,resize,wait,check,formattable,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0,keydirectory=/metadata/vold/metadata_encryption,metadata_encryption=aes-256-xts:wrappedkey_v0,quota,reservedsize=128M,sysfs_path=/sys/devices/platform/soc/1d84000.ufshc,checkpoint=fs
 /dev/block/bootdevice/by-name/misc         /misc                  emmc    defaults                                                                                        defaults
+# 新增固件目录符号链接，统一固件搜索路径
+/sys/class/usb_phy                         /dev/usb_phy           none    bind                                                                                             wait,first_stage_mount
+/odm_firmware/firmware                     /odm/firmware          none    bind                                                                                             wait,first_stage_mount
+/vendor_firmware/firmware                   /vendor/firmware        none    bind                                                                                             wait,first_stage_mount

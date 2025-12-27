@@ -5,7 +5,9 @@
 <manifest version="8.0" type="device">
     <hal format="aidl">
         <name>android.hardware.secure_element</name>
+        <version>1</version>  <!-- 匹配服务二进制文件的HAL版本 -->
         <fqname>ISecureElement/SIM1</fqname>
         <fqname>ISecureElement/SIM2</fqname>
     </hal>
 </manifest>
+

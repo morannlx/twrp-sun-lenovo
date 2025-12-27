@@ -72,6 +72,8 @@ import /vendor/etc/ueventd.qcom.userdebug.rc
 # else /* OPLUS_FEATURE_WIFI_BDF */
 firmware_directories /mnt/vendor/persist/copy/ /odm/etc/wifi/ /mnt/vendor/persist/ /vendor/firmware_mnt/image/
 # endif /* OPLUS_FEATURE_WIFI_BDF */
+# 新增固件路径，适配adsp、haptic、触控等固件加载
+firmware_directories += /vendor/firmware /odm/firmware /data/vendor/firmware /firmware/image
 
 subsystem dma_heap
     devname uevent_devpath
@@ -200,6 +202,8 @@ subsystem mem_buf_vm
 /dev/media*               0660   system     camera
 /dev/v4l-subdev*          0660   system     camera
 /dev/qseecom              0660   system     drmrpc
+/dev/mink/*               0660   system     drmrpc
+/dev/minksocket           0660   system     drmrpc
 /dev/qce                  0660   system     drmrpc
 /dev/smcinvoke            0660   system     drmrpc
 /dev/qsee_ipc_irq_spss    0660   system     drmrpc
@@ -435,6 +439,9 @@ subsystem mem_buf_vm
 #ImproveTouch device
 /dev/hbtp_input           0660   system     system
 /dev/hbtp_vm              0660   system     system
+# Novatek触控面板固件加载权限
+/dev/spi0.0               0660   system     input
+/sys/devices/platform/soc/spi0.0/firmware_path 0660 system input
 
 # LegacyTouch device
 /sys/kernel/qts/primary/trusted_touch*    0660   system     system
@@ -482,6 +489,10 @@ subsystem mem_buf_vm
 /sys/class/qcom-haptics    visense_enabled     0400    system    system
 /sys/class/qcom-haptics    primitive_duration  0600    system    system
 
+# 振动马达固件加载权限
+/dev/haptic_hv            0660   system     audio
+/sys/class/leds/vibrator/firmware 0660 system audio
+
 # NPU device
 /dev/msm_npu             0644   system     system
 
@@ -509,6 +520,9 @@ subsystem mem_buf_vm
 
 #USB mode setting
 /sys/bus/platform/devices/a600000.ssusb    mode        0660  system  usb
+# USB PHY节点权限，修复中断缺失问题
+/sys/devices/platform/soc/*_phy/enable 0660 system usb
+/dev/usb_phy              0660   system     usb
 
 #Memory Offline
 /sys/devices/system/memory/memory* state    0660 system system
