@@ -40,6 +40,7 @@ service post-boot-script /system/bin/sh -c /vendor/bin/init.kernel.post_boot-pin
 on init
     setprop sys.usb.configfs 1
     setprop prepdecrypt.setpatch true
+    start vendor.keymint-qti
     start vendor.boot-qti
     start vendor.gatekeeper_default
     start vendor.qseecomd  # 提前启动QSEECom，为SE服务做准备
