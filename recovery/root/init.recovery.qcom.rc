@@ -24,18 +24,14 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+import /init.recovery.wifi.rc
 
 on early-fs
     write /proc/sys/walt/sched_lib_name "recovery,Updater,updater,update_engine_sideload"
     write /proc/sys/walt/sched_lib_mask_force 255
-    # 创建固件目录，解决固件加载失败问题
-    mkdir -p /vendor/firmware 0755 root root
-    mkdir -p /odm/firmware 0755 root root
-    mkdir -p /data/vendor/firmware 0755 system system
-    # 创建MinkIPC通信目录，修复通信异常
-    mkdir -p /dev/mink 0770 system drmrpc
+    mkdir -p /dev/mink 0770 system drmrpc  # MinkIPC通信依赖
 
-service post-boot-script /system/bin/sh -c /vendor/bin/init.kernel.post_boot-sun_default_6_2.sh
+service post-boot-script /system/bin/sh -c /vendor/bin/init.kernel.post_boot-pineapple_default_2_3_2_1.sh
     user root
     group root
     oneshot
@@ -44,71 +40,75 @@ service post-boot-script /system/bin/sh -c /vendor/bin/init.kernel.post_boot-sun
 on init
     setprop sys.usb.configfs 1
     setprop prepdecrypt.setpatch true
-    # 启动Keymint服务（Secure Element依赖）
-    start vendor.keymint-qti
     start vendor.boot-qti
     start vendor.gatekeeper_default
-    # 启动QSEECom服务（安全执行环境，保障加密服务）
-    start vendor.qseecomd
+    start vendor.qseecomd  # 提前启动QSEECom，为SE服务做准备
+    # 禁用未补固件的remoteproc服务（adsp/cdsp/soccp）
+    write /sys/class/remoteproc/remoteproc0/state stop
+    write /sys/class/remoteproc/remoteproc2/state stop
+    write /sys/class/remoteproc/remoteproc3/state stop
 
 on property:ro.boot.usbcontroller=*
     setprop sys.usb.controller ${ro.boot.usbcontroller}
+    # 修复USB PHY中断缺失：先绑定PHY再设置模式
+    wait /sys/devices/platform/soc/a600000.ssusb/phy
+    symlink /sys/devices/platform/soc/a600000.ssusb/phy /sys/class/usb_phy
+    write /sys/class/usb_phy/enable 1
+    # 再配置USB模式
     wait /sys/bus/platform/devices/${ro.boot.usb.dwc3_msm:-a600000.ssusb}/mode
     write /sys/bus/platform/devices/${ro.boot.usb.dwc3_msm:-a600000.ssusb}/mode peripheral
     wait /sys/class/udc/${ro.boot.usbcontroller} 1
-    # 绑定USB PHY节点，修复HS PHY中断缺失问题
-    symlink /sys/devices/platform/soc/${ro.boot.usbcontroller}_phy /sys/class/usb_phy
-    write /sys/class/usb_phy/enable 1
 
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
     write /proc/sys/kernel/firmware_config/force_sysfs_fallback 1
-    # 加载MinkIPC模块，修复通信异常
-    insmod /vendor/lib64/modules/minksocket.ko
-    # 扩展固件搜索路径，解决adsp、haptic等固件加载失败
-    setprop firmware_directories "/vendor/firmware:/vendor/firmware_mnt/image:/odm/firmware:/firmware/image:/data/vendor/firmware"
+    chmod 0660 /dev/qseecom
+    chown system drmrpc /dev/qseecom
+    chmod 0664 /dev/ion
+    chown system system /dev/ion
+    mkdir /mnt/vendor 0775 shell system
+    mkdir /mnt/vendor/persist 0775 shell system
+    mkdir /tmp/persist 0775 shell system
+    mount none /tmp/persist /mnt/vendor/persist bind rec
+    install_keyring
+
+on post-fs
+    setprop twrp.variant.files_copied 0
 
 on property:twrp.modules.loaded=true
-    # Mount firmware（主固件分区）
+    # 仅保留modem分区挂载（已补固件无需额外分区）
     mkdir /firmware
     mount vfat /dev/block/bootdevice/by-name/modem${ro.boot.slot_suffix} /firmware ro
-    # Mount ODM固件分区（解决haptic、触控固件缺失）
-    mkdir /odm_firmware
-    mount ext4 /dev/block/mapper/odm${ro.boot.slot_suffix} /odm_firmware ro
-    symlink /odm_firmware/firmware /odm/firmware
-    # Load ADSP固件 for PMIC
-    wait /sys/kernel/boot_adsp/ssr
-    write /sys/kernel/boot_adsp/ssr 1
+    # 保留已补固件的符号链接（触控+振动固件加载需要）
+    symlink /firmware /vendor/firmware
+    # 已删除ADSP固件加载（未补固件）
     wait /sys/class/power_supply/battery
-    # 调整服务启动顺序：依赖服务先启动
     start vendor.health-default
-    start override-spl
-    umount /vendor
-    # 修复固件挂载路径权限
-    symlink /firmware /vendor/firmware_mnt
-    chmod 0755 /vendor/firmware_mnt
-    # 启动外设服务
-    start vendor.oplus.vibrator
-    # 先启动QSEECom，再启动Secure Element（依赖安全执行环境）
-    wait vendor.qseecomd
-    start vendor.secure_element
-    # 启动Weaver服务（FBE加密密钥依赖）
-    start vendor.weaver_nxp
+    start variant-script
 
-on property:vendor.sys.listeners.registered=true
+on property:servicemanager.ready=true
     setprop sys.boot_completed 1
     start vendor.ssgtzd
 
-# 服务崩溃自动重启配置（提升稳定性）
+on property:twrp.variant.files_copied=1
+    start prepdecrypt.vendor
+    umount /vendor
+    start vendor.oplus.vibrator  # 启动振动服务（依赖已补固件）
+    # 调整SE服务启动顺序：等待QSEECom就绪后延迟启动
+    wait vendor.qseecomd
+    sleep 2
+    start vendor.secure_element
+    start vendor.weaver_nxp
+    start vendor.se_omapi
+
+# 服务崩溃自动重启（保障加密核心服务）
 on property:init.svc.vendor.secure_element=stopped
     sleep 2
     start vendor.secure_element
-
 on property:init.svc.vendor.weaver_nxp=stopped
     sleep 2
     start vendor.weaver_nxp
-
 on property:init.svc.vendor.keymint-qti=stopped
     sleep 2
     start vendor.keymint-qti

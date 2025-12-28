@@ -1,21 +1,15 @@
-# Copyright (c) 2019 Qualcomm Technologies, Inc.
-# All Rights Reserved.
-# Confidential and Proprietary - Qualcomm Technologies, Inc.
+# Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 
-# 修复Secure Element服务启动依赖、权限与稳定性问题
 service vendor.secure_element /vendor/bin/hw/android.hardware.secure_element-service.qti
     class hal
-    user root
-    group nfc root drmrpc  # 新增drmrpc组，适配密钥服务权限要求
+    user system
+    group system nfc drmrpc root
+    capabilities WAKE_ALARM
     seclabel u:r:recovery:s0
-    after vendor.keymint-qti  # 依赖Keymint服务启动后再启动，确保密钥服务就绪
-    after vendor.qseecomd     # 依赖QSEECom服务，保障安全执行环境
-    start timeout 15000       # 延长启动超时至15秒，避免启动过快失败
-    oneshot false            # 允许服务异常后自动重启
-    capabilities WAKE_ALARM   # 授予唤醒权限，防止服务休眠
-    file /dev/kmsg w         # 允许写入日志，便于调试
-
-# 服务崩溃后自动重启配置
-on property:init.svc.vendor.secure_element=stopped
+    # 依赖QSEECom服务就绪
+    after vendor.qseecomd
+    wait vendor.qseecomd
+    # 延迟启动避免竞争
+    oneshot
     sleep 2
-    start vendor.secure_element

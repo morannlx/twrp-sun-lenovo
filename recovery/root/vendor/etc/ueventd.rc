@@ -72,9 +72,6 @@ import /vendor/etc/ueventd.qcom.userdebug.rc
 # else /* OPLUS_FEATURE_WIFI_BDF */
 firmware_directories /mnt/vendor/persist/copy/ /odm/etc/wifi/ /mnt/vendor/persist/ /vendor/firmware_mnt/image/
 # endif /* OPLUS_FEATURE_WIFI_BDF */
-# 新增固件路径，适配adsp、haptic、触控等固件加载
-firmware_directories += /vendor/firmware /odm/firmware /data/vendor/firmware /firmware/image
-
 subsystem dma_heap
     devname uevent_devpath
     dirname /dev/dma_heap
