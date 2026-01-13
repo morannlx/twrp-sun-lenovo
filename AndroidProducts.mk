@@ -4,4 +4,4 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-PRODUCT_MAKEFILES := $(LOCAL_DIR)/twrp_tb322fc.mk
+PRODUCT_MAKEFILES := $(LOCAL_DIR)/twrp_elden.mk
