@@ -97,7 +97,7 @@ TW_INCLUDE_ZSTD               := true
 
 # TWRP display
 TW_BRIGHTNESS_PATH      := /sys/class/backlight/panel0-backlight/brightness
-TW_DEFAULT_BRIGHTNESS   := 1000
+TW_DEFAULT_BRIGHTNESS   := 1200
 TW_FRAMERATE            := 120
 TW_MAX_BRIGHTNESS       := 2047
 TW_SCREEN_BLANK_ON_BOOT := true
@@ -117,7 +117,7 @@ PLATFORM_VERSION                := 99.87.36
 PLATFORM_VERSION_LAST_STABLE    := $(PLATFORM_VERSION)
 PLATFORM_SECURITY_PATCH         := 2099-12-31
 VENDOR_SECURITY_PATCH           := $(PLATFORM_SECURITY_PATCH)
-TW_DEVICE_VERSION               := TB322FC
+TW_DEVICE_VERSION               := Lenovo Legion Y700 Gen 4
 
 # Verified Boot
 BOARD_AVB_ENABLE := true

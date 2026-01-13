@@ -4,14 +4,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-DEVICE_PATH := device/lenovo/tb322fc
+DEVICE_PATH := device/lenovo/elden
 
 # Inherit from device.mk configuration
 $(call inherit-product, $(DEVICE_PATH)/device.mk)
 
 ## Device identifier
-PRODUCT_DEVICE := tb322fc
-PRODUCT_NAME := twrp_322fc
+PRODUCT_DEVICE := elden
+PRODUCT_NAME := twrp_elden
 PRODUCT_BRAND := lenovo
 PRODUCT_SYSTEM_DEVICE := TB322FC
 PRODUCT_MODEL := TB322FC
