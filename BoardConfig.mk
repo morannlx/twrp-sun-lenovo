@@ -123,7 +123,7 @@ TW_DEVICE_VERSION               := Lenovo Legion Y700 Gen 4
 BOARD_AVB_ENABLE := true
 
 # Vibrator
-TW_SUPPORT_INPUT_AIDL_HAPTICS := true
+#TW_SUPPORT_INPUT_AIDL_HAPTICS := true
 
 # Other TWRP Configurations
 TARGET_RECOVERY_QCOM_RTC_FIX            := true
