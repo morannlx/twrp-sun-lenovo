@@ -22,11 +22,11 @@ on:
       DEVICE_PATH:
         description: "Device path device/"
         required: true
-        default: "lenovo/tb322fc"
+        default: "lenovo/elden"
       DEVICE_NAME:
         description: "Device name"
         required: true
-        default: "tb322fc"
+        default: "elden"
       LUNCH_TARGET:
         description: "lunch twrp_ (default same as device name)"
         required: false
