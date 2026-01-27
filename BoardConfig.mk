@@ -86,6 +86,7 @@ QCOM_BOARD_PLATFORMS    += sun
 BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE    := true
 TARGET_RECOVERY_PIXEL_FORMAT                := RGBX_8888
 TW_INCLUDE_FASTBOOTD                        := true
+TW_HAS_EDL_MODE                             := true
 
 # Tool
 TW_ENABLE_ALL_PARTITION_TOOLS := true
