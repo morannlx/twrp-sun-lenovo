@@ -62,12 +62,11 @@ on property:twrp.modules.loaded=true
     wait /sys/class/power_supply/battery
     start vendor.health-default
     start override-spl
-    umount /vendor
-    #symlink /firmware /vendor/firmware_mnt
-    mount vfat /dev/block/bootdevice/by-name/modem${ro.boot.slot_suffix} /vendor/firmware_mnt ro
     start vendor.secure_element
     start vendor.weaver_nxp
 
 on property:vendor.sys.listeners.registered=true
+    umount /vendor
+    symlink /firmware /vendor/firmware_mnt
     setprop sys.boot_completed 1
     start vendor.ssgtzd
